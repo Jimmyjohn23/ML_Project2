@@ -82,8 +82,8 @@ Fine Crackles & 13 \\
 % ---------------------------------------------------------------------------
 % INSERTED
 % ---------------------------------------------------------------------------
-Of the 195 labelled lung recordings present in the HLS-CMDS release \cite{b5},
-101 were exact duplicates of another file. Duplication was verified at the signal level as well as the byte
+Of the 195 labelled lung recordings present in the HLS-CMDS release, a large
+portion were exact duplicates of another file. Duplication was verified at the signal level as well as the byte
 level: for every flagged pair the Pearson correlation between waveforms was 1.000
 and the maximum absolute sample difference was 0. Deduplication was performed
 \emph{before} any train/test split, because a recording appearing in both
@@ -108,7 +108,7 @@ recording:
 
 \begin{itemize}
     \item loading waveform files and labels as mono audio at 8~kHz using
-    librosa \cite{b2};
+    librosa;
     \item center-cropping or zero-padding each clip to a fixed duration of
     10~seconds, giving 80{,}000 samples per recording;
     \item computing a mel-spectrogram with a 1024-point FFT, a hop length of
@@ -157,13 +157,13 @@ for the project.
 
 \subsection{Model Architecture}
 Two architectures were evaluated. The \textbf{multi-layer perceptron} was
-implemented with scikit-learn's \texttt{MLPClassifier} \cite{b6} inside a
+implemented with scikit-learn's \texttt{MLPClassifier} inside a
 \texttt{Pipeline} containing a \texttt{StandardScaler}, so that feature
 standardization is refit on each cross-validation training fold and never sees
 held-out data. The best MLP used one hidden layer of 64 units with tanh activation. 
 Counting the output layer, that comes to 8,646 trainable parameters.
 
-The \textbf{convolutional neural network} was implemented in PyTorch \cite{b4} as
+The \textbf{convolutional neural network} was implemented in PyTorch as
 three convolutional blocks with channel widths 16, 32, and 64. Each block applies
 a $3 \times 3$ convolution with padding of 1, batch normalization, and a ReLU
 activation; the first two are followed by $2 \times 2$ max pooling and the third
@@ -218,7 +218,7 @@ The CNN was trained with cross-entropy loss, and the network produced raw output
 Adam was used for optimization, with early stopping on a stratified
 20\% internal validation split and a patience of 10 epochs, capped at 100 epochs.
 To keep the comparison between models fair, the CNN was wrapped in a
-skorch \cite{b7} \texttt{NeuralNetClassifier}, which exposes a scikit-learn
+skorch \texttt{NeuralNetClassifier}, which exposes a scikit-learn
 compatible interface, so the identical \texttt{GridSearchCV} and
 \texttt{StratifiedKFold} procedure could be applied to both models over the same
 folds with the same scoring rule. The selected CNN used a learning rate of
@@ -365,7 +365,7 @@ own feature detectors from only 70 training recordings, while the MLP was
 trained on a simpler representation based on the mean and standard deviation of
 each mel band. That made it easier for the MLP to perform well given the amount
 of data available. This trade-off between model capacity and training set size
-is a standard result in machine learning \cite{b1}.
+is a standard result in machine learning.
 
 The class-level results support this interpretation. Wheezing was easy for both
 models, which is reasonable because wheezes appear as clear, sustained patterns
@@ -391,7 +391,7 @@ Resampling and augmentation could still help, especially for the harder classes
 such as Fine Crackles, but they are not a complete solution by themselves.
 
 \textit{Oversampling in feature space:} Random oversampling duplicates
-minority-class examples, while SMOTE \cite{b8} creates new examples by
+minority-class examples, while SMOTE creates new examples by
 interpolating between samples from the same class. This is straightforward for
 the MLP because its input is already a fixed 128-dimensional vector. For the CNN,
 though, the idea is less convincing because interpolating between two
@@ -406,7 +406,7 @@ help it.
 data in the audio or spectrogram domain instead of the feature domain.
 Label-preserving transformations such as time shifting, time stretching, pitch
 shifting, adding background noise, and SpecAugment-style time and frequency
-masking \cite{b10} can create new examples that still look like realistic
+masking can create new examples that still look like realistic
 recordings. Because they are applied before feature extraction, they could help
 both the CNN and the MLP. This is especially relevant for Fine Crackles, which
 were the hardest class for both models.
@@ -423,7 +423,7 @@ Applying SMOTE before the train/test split would let synthetic points derived
 from test recordings leak into training, which would make the reported results
 too optimistic. That is the same kind of problem as the duplicate recordings
 discussed earlier, and it is easy to miss because the resampled data still looks
-well formed. The \texttt{imbalanced-learn} pipeline \cite{b9} can combine
+well formed. The \texttt{imbalanced-learn} pipeline can combine
 resampling with an estimator in a way that is safe for cross-validation.
 
 Any gain from these methods would also need to be judged carefully. With only
@@ -464,8 +464,8 @@ Several limitations affect how strong these conclusions are.
 This project builds a pipeline that classifies lung sound recordings into six
 categories. When creating this pipeline, cleaning and deduplicating the dataset
 proved to be very critical to ensure that the model was not memorizing the data.
-Of the 195 initial files, 101 were exact duplicates, leaving only 94 recordings.
-Had this step not been caught, accuracy would have looked deceptively high.
+Of the 195 initial files, a large number were exact duplicates, leaving only 94
+recordings. Had this step not been caught, accuracy would have looked deceptively high.
 
 Our best MLP reached 0.880 cross-validated accuracy and 0.84 on the test set,
 with a macro F1 of 0.82. The CNN, tuned the same way, reached 0.671 and 0.75,
@@ -481,40 +481,5 @@ recordings of it. We should also have run that experiment instead of only
 reasoning about it.
 
 
-
-\begin{thebibliography}{00}
-% --- ORIGINAL entries [1]-[4] -- unchanged ---
-\bibitem{b1} I. Goodfellow, Y. Bengio, and A. Courville, \textit{Deep Learning}.
-Cambridge, MA, USA: MIT Press, 2016.
-
-\bibitem{b2} B. McFee et al., ``librosa: Audio and music signal analysis in
-Python,'' in \textit{Proc. 14th Python in Science Conf.}, 2015, pp. 18--25.
-
-\bibitem{b4} A. Paszke et al., ``PyTorch: An imperative style, high-performance
-deep learning library,'' in \textit{Advances in Neural Information Processing
-Systems}, vol. 32, 2019.
-
-% --- INSERTED entries [5]-[10] ---
-\bibitem{b5} ``HLS-CMDS dataset,'' IEEE DataPort, 2025. [Online]. Available:
-\url{https://doi.org/10.1109/IEEEDATA.2025.3566012}
-
-\bibitem{b6} F. Pedregosa et al., ``Scikit-learn: Machine learning in Python,''
-\textit{J. Mach. Learn. Res.}, vol. 12, pp. 2825--2830, 2011.
-
-\bibitem{b7} skorch Developers, ``skorch: A scikit-learn compatible neural
-network library that wraps PyTorch,'' 2017. [Online]. Available:
-\url{https://skorch.readthedocs.io}
-
-\bibitem{b8} N. V. Chawla et al., ``SMOTE: Synthetic minority over-sampling
-technique,'' \textit{J. Artif. Intell. Res.}, vol. 16, pp. 321--357, 2002.
-
-\bibitem{b9} G. Lema\^{i}tre, F. Nogueira, and C. K. Aridas,
-``Imbalanced-learn: A Python toolbox to tackle imbalanced datasets in machine
-learning,'' \textit{J. Mach. Learn. Res.}, vol. 18, no. 17, pp. 1--5, 2017.
-
-\bibitem{b10} D. S. Park et al., ``SpecAugment: A simple data augmentation
-method for automatic speech recognition,'' in \textit{Proc. Interspeech}, 2019,
-pp. 2613--2617.
-\end{thebibliography}
 
 \end{document}
